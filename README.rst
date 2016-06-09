@@ -1,0 +1,2 @@
+Kinto custom emailer
+####################
