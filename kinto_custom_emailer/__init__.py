@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from email.mime.text import MIMEText
-from string import Template
-import codecs
+from jinja2 import Template, FileSystemLoader, Environment
+
 import smtplib
 
 from kinto.core.listeners import ListenerBase
@@ -10,7 +10,7 @@ from pyramid.settings import aslist, asbool
 
 class Listener(ListenerBase):
     def __init__(self, server, tls, username, password, sender, recipients,
-                 template, subject_template, bucket, collection, email_field):
+                 templates_folder, bucket, collection, email_field):
         self.server = server
         self.tls = tls
         self.username = username
@@ -20,9 +20,12 @@ class Listener(ListenerBase):
         self.bucket = bucket
         self.collection = collection
         self.email_field = email_field
-        self.subject_template = Template(subject_template)
-        with codecs.open(template, 'rb', encoding='utf-8') as f:
-            self.template = Template(f.read())
+        self.templates_folder = templates_folder
+
+        simple_loader = FileSystemLoader(self.templates_folder)
+        env = Environment(loader=simple_loader)
+        self.template = env.get_template("newrecord")
+        self.subject_template = Template("subject")
 
     def __call__(self, event):
         if not (event.payload.get('bucket_id') == self.bucket and
@@ -30,10 +33,10 @@ class Listener(ListenerBase):
             return
 
         record = event.impacted_records[0]['new']
-        text = self.template.substitute(record)
+        text = self.template.render(record)
 
         message = MIMEText(text, 'plain', 'UTF-8')
-        message['Subject'] = self.subject_template.substitute(record)
+        message['Subject'] = self.subject_template.render(record)
         message['From'] = self.sender
         message['To'] = record[self.email_field]
         message['Cc'] = ", ".join(self.recipients)
@@ -57,9 +60,8 @@ def load_from_config(config, prefix=''):
         password=settings[prefix + 'password'],
         sender=settings[prefix + 'from'],
         recipients=aslist(settings[prefix + 'recipients']),
-        template=settings[prefix + 'template'],
+        templates_folder=settings[prefix + 'templates_folder'],
         bucket=settings[prefix + 'bucket'],
         collection=settings[prefix + 'collection'],
         email_field=settings[prefix + 'email_field'],
-        subject_template=settings[prefix + 'subject_template']
     )

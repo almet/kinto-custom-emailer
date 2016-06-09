@@ -13,7 +13,9 @@ def read_file(filename):
 
 README = read_file('README.rst')
 
-REQUIREMENTS = []
+REQUIREMENTS = [
+        'jinja2',
+]
 DEPENDENCY_LINKS = []
 
 
