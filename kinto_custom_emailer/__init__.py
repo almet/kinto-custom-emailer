@@ -36,10 +36,11 @@ class Listener(ListenerBase):
                   for key, value in event.impacted_records[0]['new'].items()}
         text = self.template.render(record)
 
+        to = record[self.email_field]
         message = MIMEText(text, 'plain', 'UTF-8')
         message['Subject'] = self.subject_template.render(record)
         message['From'] = self.sender
-        message['To'] = record[self.email_field]
+        message['To'] = to
         message['Cc'] = ", ".join(self.recipients)
 
         server = smtplib.SMTP(self.server)
@@ -47,7 +48,8 @@ class Listener(ListenerBase):
             server.starttls()
         if self.username and self.password:
             server.login(self.username, self.password)
-        server.sendmail(self.sender, self.recipients, message.as_string())
+        server.sendmail(self.sender, self.recipients + [to, ],
+                        message.as_string())
         server.quit()
 
 
