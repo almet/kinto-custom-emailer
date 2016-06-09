@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from email.mime.text import MIMEText
 from string import Template
 import codecs
@@ -31,7 +32,7 @@ class Listener(ListenerBase):
         record = event.impacted_records[0]['new']
         text = self.template.substitute(record)
 
-        message = MIMEText(text)
+        message = MIMEText(text, 'plain', 'UTF-8')
         message['Subject'] = self.subject_template.substitute(record)
         message['From'] = self.sender
         message['To'] = record[self.email_field]
