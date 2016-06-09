@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from email.mime.text import MIMEText
-from jinja2 import Template, FileSystemLoader, Environment
+from jinja2 import FileSystemLoader, Environment
 
 import smtplib
 
