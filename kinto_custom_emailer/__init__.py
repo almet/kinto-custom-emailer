@@ -25,7 +25,7 @@ class Listener(ListenerBase):
         simple_loader = FileSystemLoader(self.templates_folder)
         env = Environment(loader=simple_loader)
         self.template = env.get_template("newrecord")
-        self.subject_template = Template("subject")
+        self.subject_template = env.get_template("subject")
 
     def __call__(self, event):
         if not (event.payload.get('bucket_id') == self.bucket and
