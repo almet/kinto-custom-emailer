@@ -32,7 +32,8 @@ class Listener(ListenerBase):
                 event.payload.get('collection_id') == self.collection):
             return
 
-        record = event.impacted_records[0]['new']
+        record = {key.replace('-', '_'): value
+                  for key, value in event.impacted_records[0]['new'].items()}
         text = self.template.render(record)
 
         message = MIMEText(text, 'plain', 'UTF-8')
